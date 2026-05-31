@@ -6,11 +6,13 @@ import { externalLinkProps, fadeUp, site } from './data/site'
 function App() {
   return (
     <div
-      className="relative flex min-h-svh flex-col bg-white overflow-x-hidden"
+      className="flex h-dvh flex-col bg-white overflow-hidden"
       style={{ fontFamily: "'Instrument Sans', sans-serif" }}
     >
-      <main className="flex flex-1 flex-col items-center justify-center py-16">
-        <div className="flex flex-col items-center gap-8 w-full max-w-[313px] px-6">
+      <main className="flex flex-1 flex-col items-center justify-between overflow-hidden px-6 py-10">
+        <div />
+
+        <div className="flex flex-col items-center gap-8 w-full max-w-[313px]">
           <motion.div className="relative shrink-0 size-[72px]" {...fadeUp(0)}>
             <div className="absolute flex items-center justify-center left-[-16.5px] size-[85.396px] top-[-7.18px]">
               <div className="-rotate-12 flex-none">
@@ -66,19 +68,18 @@ function App() {
 
           <div className="flex w-full flex-col items-center gap-4">
             <CopyEmail />
-
             <SocialLinks />
           </div>
         </div>
-      </main>
 
-      <motion.div
-        className="shrink-0 flex flex-col items-center gap-1 pb-[40px] text-[12px] text-center leading-5"
-        {...fadeUp(0.77)}
-      >
-        <p className="text-[#5C5C5C] font-normal">© Çağrı Konyalı</p>
-        <p className="text-[#D1CECE] font-normal">Clarity over noise.</p>
-      </motion.div>
+        <motion.div
+          className="flex flex-col items-center gap-1 text-[12px] text-center leading-5"
+          {...fadeUp(0.77)}
+        >
+          <p className="text-[#5C5C5C] font-normal">© Çağrı Konyalı</p>
+          <p className="text-[#D1CECE] font-normal">Clarity over noise.</p>
+        </motion.div>
+      </main>
     </div>
   )
 }
