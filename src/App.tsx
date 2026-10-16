@@ -1,5 +1,4 @@
 import { motion } from 'motion/react'
-import { CopyEmail } from './components/CopyEmail'
 import { SocialLinks } from './components/SocialLinks'
 import { externalLinkProps, fadeUp, site } from './data/site'
 
@@ -67,7 +66,6 @@ function App() {
           </motion.div>
 
           <div className="flex w-full flex-col items-center gap-4">
-            <CopyEmail />
             <SocialLinks />
           </div>
         </div>
