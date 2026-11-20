@@ -1,83 +1,145 @@
-import { motion } from 'motion/react'
+import { useEffect, useRef, useState } from 'react'
+import { Intro } from './components/Intro'
 import { SocialLinks } from './components/SocialLinks'
-import { externalLinkProps, fadeUp, site } from './data/site'
+import { site } from './data/site'
+
+const BIO = [
+  'A product designer based in Istanbul, currently designing AI products at AppNation.',
+  'I care about clarity, calm interfaces and digital experiences that feel human.',
+]
+
+// Words that are already dark when the bio appears ("A product")
+const LEAD_WORDS = 2
+const INTRO_MS = 5600
+
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' &&
+  !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
 function App() {
-  return (
-    <div
-      className="flex h-dvh flex-col bg-white overflow-hidden"
-      style={{ fontFamily: "'Instrument Sans', sans-serif" }}
-    >
-      <main className="flex flex-1 flex-col items-center justify-between overflow-hidden px-6 py-10">
-        <div />
+  const [showIntro, setShowIntro] = useState(() => !prefersReducedMotion())
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const textRef = useRef<HTMLDivElement>(null)
+  const hintRef = useRef<HTMLDivElement>(null)
 
-        <div className="flex flex-col items-center gap-8 w-full max-w-[313px]">
-          <motion.div className="relative shrink-0 size-[72px]" {...fadeUp(0)}>
-            <div className="absolute flex items-center justify-center left-[-16.5px] size-[85.396px] top-[-7.18px]">
-              <div className="-rotate-12 flex-none">
-                <div className="bg-gradient-to-b from-[#ebebeb] to-[rgba(235,235,235,0.1)] relative rounded-[16px] size-[72px]" />
+  // Remove the loading ring once its exit animation has finished
+  useEffect(() => {
+    if (!showIntro) return
+    const t = window.setTimeout(() => setShowIntro(false), INTRO_MS)
+    return () => window.clearTimeout(t)
+  }, [showIntro])
+
+  // Scroll-driven, smoothed word highlight + outro reveal
+  useEffect(() => {
+    const scroller = scrollerRef.current
+    const track = trackRef.current
+    if (!scroller || !track) return
+
+    const reduce = prefersReducedMotion()
+    const words = Array.from(textRef.current?.querySelectorAll<HTMLElement>('.word') ?? [])
+    const n = words.length
+    const lead = Math.min(LEAD_WORDS, n)
+    let target = 0
+    let p = 0
+    let drawn = false
+    let raf = 0
+
+    const read = () => {
+      const max = track.offsetHeight - scroller.clientHeight
+      target = max > 0 ? Math.min(1, Math.max(0, (scroller.scrollTop - track.offsetTop) / max)) : 1
+    }
+
+    const apply = (v: number) => {
+      // words light up left to right over the first 85% of the scroll
+      const prog = lead + Math.max(0, Math.min(1, (v - 0.04) / 0.81)) * (n - lead)
+      for (let i = 0; i < n; i++) {
+        const k = Math.max(0, Math.min(1, prog - i))
+        const c = Math.round(230 - k * (230 - 68)) // #E6E6E6 → #444444
+        words[i].style.color = `rgb(${c},${c},${c})`
+      }
+      if (hintRef.current) hintRef.current.style.opacity = String(Math.max(0, 1 - v * 20))
+      stageRef.current?.classList.toggle('on', v >= 0.88)
+    }
+
+    const tick = () => {
+      raf = requestAnimationFrame(tick)
+      const d = target - p
+      if (Math.abs(d) < 0.0005 && drawn) return
+      p = Math.abs(d) < 0.0005 ? target : p + d * (reduce ? 1 : 0.09)
+      drawn = true
+      apply(p)
+    }
+
+    read()
+    scroller.addEventListener('scroll', read, { passive: true })
+    window.addEventListener('resize', read)
+    raf = requestAnimationFrame(tick)
+    return () => {
+      cancelAnimationFrame(raf)
+      scroller.removeEventListener('scroll', read)
+      window.removeEventListener('resize', read)
+    }
+  }, [])
+
+  return (
+    <div className="relative h-dvh w-full overflow-hidden bg-white text-[#111111]">
+      <div ref={scrollerRef} className="scroller absolute inset-0 overflow-x-hidden overflow-y-auto">
+        <div ref={trackRef} className="relative h-[260vh]">
+          <div
+            ref={stageRef}
+            className="sticky top-0 flex h-dvh min-h-[640px] flex-col items-center justify-center px-6 pt-[72px] pb-[140px] text-center"
+          >
+            {/* photo */}
+            <div className="relative mb-11 size-24">
+              <div className="avatar-ghost absolute inset-0 rounded-[28px] bg-[#EDEDEA] shadow-[0_16px_36px_-18px_rgba(0,0,0,0.2)]" aria-hidden="true" />
+              <div className="avatar-in absolute inset-0 overflow-hidden rounded-[28px] bg-[#111111] shadow-[0_26px_46px_-18px_rgba(0,0,0,0.42),0_2px_6px_rgba(0,0,0,0.08)]">
+                <img src={site.profileImage} alt="Portrait of Çağrı Konyalı" className="block size-full object-cover" />
               </div>
             </div>
-            <div className="-translate-x-1/2 absolute left-1/2 rounded-[20px] shadow-[0px_8px_16px_0px_rgba(0,0,0,0.25)] size-[72px] top-0">
-              <img
-                alt="Çağrı Konyalı"
-                className="absolute inset-0 max-w-none object-cover pointer-events-none rounded-[20px] size-full"
-                src={site.profileImage}
-              />
-            </div>
-          </motion.div>
 
-          <motion.div
-            className="flex gap-2 items-center justify-center text-[32px] tracking-[-0.64px] w-full whitespace-nowrap"
-            {...fadeUp(0.11)}
-          >
-            <span className="font-semibold text-[#DDDDDD]">Hey,</span>
-            <span className="font-bold text-[#111111]">I'm Çağrı.</span>
-          </motion.div>
+            <h1 className="rise d1 mb-10 text-[40px] leading-[1.15] font-bold tracking-[-0.04em] text-[#111111]">
+              <span className="font-semibold text-[#DDDDDD]">Hey,</span> I’m Çağrı.
+            </h1>
 
-          <div className="flex flex-col items-center gap-4 text-[13px] text-center leading-[24px] w-full">
-            <motion.p className="text-[#444444] font-normal" {...fadeUp(0.22)}>
-              A product designer based in Istanbul,
-              <br />
-              currently designing AI products at AppNation.
-            </motion.p>
-            <motion.p className="text-[#A2A2A2] font-normal" {...fadeUp(0.33)}>
-              I care about clarity, calm interfaces
-              <br />
-              and digital experiences that feel human.
-            </motion.p>
-          </div>
-
-          <motion.div
-            className="bg-[#F5F5F5] p-[5px] rounded-full"
-            {...fadeUp(0.44)}
-          >
-            <a
-              href={site.viewWorkHref}
-              {...externalLinkProps}
-              className="bg-white flex items-center gap-2 h-12 px-6 rounded-full shadow-[0px_4px_8px_rgba(0,0,0,0.06)] border border-transparent text-[12px] font-normal leading-5 text-black no-underline cursor-pointer transition-all duration-300 ease-out hover:shadow-[0px_8px_16px_rgba(0,0,0,0.10)] hover:-translate-y-[2px] hover:border-[rgba(0,0,0,0.08)] active:translate-y-0 active:shadow-[0px_4px_8px_rgba(0,0,0,0.06)]"
-              style={{ fontFamily: "'Instrument Sans', sans-serif" }}
+            {/* bio, highlighted word by word on scroll */}
+            <div
+              ref={textRef}
+              className="flex w-full max-w-[460px] flex-col gap-[22px] text-[22px] leading-[1.45] font-medium tracking-[-0.025em]"
             >
-              <span>View Work</span>
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8.33334 2.19297V6.75404C8.33334 6.89362 8.2779 7.02748 8.17921 7.12618C8.08053 7.22487 7.94669 7.28032 7.80713 7.28032C7.66757 7.28032 7.53373 7.22487 7.43504 7.12618C7.33636 7.02748 7.28092 6.89362 7.28092 6.75404V3.4648L2.56652 8.17894C2.46767 8.27781 2.3336 8.33335 2.19379 8.33335C2.05399 8.33335 1.91992 8.27781 1.82106 8.17894C1.72221 8.08007 1.66667 7.94598 1.66667 7.80616C1.66667 7.66634 1.72221 7.53225 1.82106 7.43338L6.53546 2.71924H3.24665C3.10709 2.71924 2.97325 2.6638 2.87456 2.5651C2.77588 2.4664 2.72044 2.33254 2.72044 2.19297C2.72044 2.05339 2.77588 1.91953 2.87456 1.82083C2.97325 1.72213 3.10709 1.66669 3.24665 1.66669H7.80713C7.94669 1.66669 8.08053 1.72213 8.17921 1.82083C8.2779 1.91953 8.33334 2.05339 8.33334 2.19297Z" fill="#444444"/>
-              </svg>
-            </a>
-          </motion.div>
+              {BIO.map((para, pi) => (
+                <p key={pi} className={`rise ${pi === 0 ? 'd2' : 'd3'} m-0`}>
+                  {para.split(' ').map((w, wi) => (
+                    <span key={wi}>
+                      <span className="word">{w}</span>{' '}
+                    </span>
+                  ))}
+                </p>
+              ))}
+            </div>
 
-          <div className="flex w-full flex-col items-center gap-4">
             <SocialLinks />
+
+            {/* scroll hint */}
+            <div className="rise d4 pointer-events-none absolute inset-x-0 bottom-8 flex justify-center">
+              <div ref={hintRef} aria-hidden="true" className="transition-opacity duration-400">
+                <div className="relative h-[34px] w-[22px] rounded-[12px] border-[1.5px] border-[#BDBDBD]">
+                  <span className="mouse-wheel absolute top-[7px] left-1/2 -ml-[1.5px] h-[6px] w-[3px] rounded-[2px] bg-[#8A8A8A]" />
+                </div>
+              </div>
+            </div>
+
+            {/* footer */}
+            <footer className="outro o2 absolute inset-x-0 bottom-10 flex flex-col items-center gap-1 text-[12px] leading-5 font-normal">
+              <p className="m-0 text-[#5C5C5C]">© Çağrı Konyalı</p>
+              <p className="m-0 text-[#D1CECE]">Clarity over noise.</p>
+            </footer>
           </div>
         </div>
+      </div>
 
-        <motion.div
-          className="flex flex-col items-center gap-1 text-[12px] text-center leading-5"
-          {...fadeUp(0.77)}
-        >
-          <p className="text-[#5C5C5C] font-normal">© Çağrı Konyalı</p>
-          <p className="text-[#D1CECE] font-normal">Clarity over noise.</p>
-        </motion.div>
-      </main>
+      {showIntro && <Intro />}
     </div>
   )
 }
