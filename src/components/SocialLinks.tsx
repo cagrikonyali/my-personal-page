@@ -1,35 +1,82 @@
-import { Fragment } from 'react'
-import { motion } from 'motion/react'
-import { externalLinkProps, fadeUp, site } from '../data/site'
+import type { ReactNode } from 'react'
+import { externalLinkProps, site } from '../data/site'
+
+const iconProps = {
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.6,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+  'aria-hidden': true,
+}
+
+const icons: Record<string, { name: string; svg: ReactNode }> = {
+  LN: {
+    name: 'LinkedIn',
+    svg: (
+      <svg width="20" height="20" viewBox="0 0 24 24" {...iconProps}>
+        <rect x="3" y="3" width="18" height="18" rx="4" />
+        <path d="M8 10.5v6M8 7.5v.01M12 16.5v-6M12 13a2.5 2.5 0 0 1 5 0v3.5" />
+      </svg>
+    ),
+  },
+  IG: {
+    name: 'Instagram',
+    svg: (
+      <svg width="20" height="20" viewBox="0 0 24 24" {...iconProps}>
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <path d="M17.5 6.5v.01" />
+      </svg>
+    ),
+  },
+  X: {
+    name: 'X',
+    svg: (
+      <svg width="18" height="18" viewBox="0 0 24 24" {...iconProps}>
+        <path d="M4 4l16 16M20 4L4 20" />
+      </svg>
+    ),
+  },
+  MD: {
+    name: 'Medium',
+    svg: (
+      <svg width="22" height="22" viewBox="0 0 24 24" {...iconProps}>
+        <circle cx="7.5" cy="12" r="4.5" />
+        <ellipse cx="16" cy="12" rx="2.2" ry="4.3" />
+        <path d="M20.5 8v8" />
+      </svg>
+    ),
+  },
+  DB: {
+    name: 'Dribbble',
+    svg: (
+      <svg width="20" height="20" viewBox="0 0 24 24" {...iconProps}>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M4.5 8.5c5 .6 10-.8 13.6-4.2M3.3 13.3c5.4-2.2 11-2 16.3.8M8.8 3.6c3.2 4.2 5.6 10.2 6.6 16.8" />
+      </svg>
+    ),
+  },
+}
 
 export function SocialLinks() {
   return (
-    <motion.div
-      className="flex items-center justify-between w-full"
-      {...fadeUp(0.66)}
-    >
-      {site.social.map((link, index) => (
-        <Fragment key={link.label}>
-          <a
-            href={link.url}
-            {...externalLinkProps}
-            className="flex items-center justify-center p-[10px] size-11 text-[13px] font-normal no-underline text-[#A2A2A2] hover:text-[#4A4A4A] transition-colors duration-200"
-            style={{ fontFamily: "'Instrument Sans', sans-serif" }}
-          >
-            {link.label}
-          </a>
-          {index < site.social.length - 1 ? (
-            <svg
-              className="size-[3px] shrink-0"
-              fill="none"
-              viewBox="0 0 3 3"
-              aria-hidden
+    <nav aria-label="Social links" className="flex flex-wrap justify-center gap-[10px] mt-16">
+      {site.social.map((link, i) => {
+        const icon = icons[link.label]
+        return (
+          <span key={link.label} className={`outro s${i + 1} inline-flex`}>
+            <a
+              href={link.url}
+              {...externalLinkProps}
+              aria-label={icon?.name ?? link.label}
+              className="social-icon flex size-11 items-center justify-center rounded-[14px] border border-[rgba(17,17,17,0.08)] bg-white text-[#111111]"
             >
-              <circle cx="1.5" cy="1.5" fill="#E9E9E9" r="1.5" />
-            </svg>
-          ) : null}
-        </Fragment>
-      ))}
-    </motion.div>
+              {icon?.svg ?? link.label}
+            </a>
+          </span>
+        )
+      })}
+    </nav>
   )
 }
