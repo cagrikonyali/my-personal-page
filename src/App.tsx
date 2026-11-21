@@ -37,6 +37,10 @@ function App() {
     const track = trackRef.current
     if (!scroller || !track) return
 
+    // Always start at the top: stop the browser from restoring an old scroll position
+    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual'
+    scroller.scrollTop = 0
+
     const reduce = prefersReducedMotion()
     const words = Array.from(textRef.current?.querySelectorAll<HTMLElement>('.word') ?? [])
     const n = words.length
@@ -72,20 +76,35 @@ function App() {
       apply(p)
     }
 
+    // Page restored from the back/forward cache: start over from the top
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (!e.persisted) return
+      scroller.scrollTop = 0
+      target = 0
+      p = 0
+      drawn = false
+    }
+
     read()
     scroller.addEventListener('scroll', read, { passive: true })
     window.addEventListener('resize', read)
+    window.addEventListener('pageshow', onPageShow)
     raf = requestAnimationFrame(tick)
     return () => {
       cancelAnimationFrame(raf)
       scroller.removeEventListener('scroll', read)
       window.removeEventListener('resize', read)
+      window.removeEventListener('pageshow', onPageShow)
     }
   }, [])
 
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-white text-[#111111]">
-      <div ref={scrollerRef} className="scroller absolute inset-0 overflow-x-hidden overflow-y-auto">
+      {/* scrolling is locked while the loading ring plays */}
+      <div
+        ref={scrollerRef}
+        className={`scroller absolute inset-0 overflow-x-hidden ${showIntro ? 'overflow-y-hidden' : 'overflow-y-auto'}`}
+      >
         <div ref={trackRef} className="relative h-[260vh]">
           <div
             ref={stageRef}
