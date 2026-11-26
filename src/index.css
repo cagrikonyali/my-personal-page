@@ -22,10 +22,9 @@
   }
 }
 
-/* ---------- Loading: one smooth turn of "Clarity over noise" + color droplets ---------- */
+/* ---------- Loading: one smooth turn of "Clarity over noise" ---------- */
 .intro{position:fixed;inset:0;z-index:20;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;animation:intro-out .7s cubic-bezier(.6,0,.2,1) 4.75s forwards}
-.intro-splash{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.intro-scene{position:relative;perspective:1100px;animation:scene-in 1.1s cubic-bezier(.22,.8,.24,1) both, scene-out .9s cubic-bezier(.6,0,.3,1) 4.3s forwards}
+.intro-scene{perspective:1100px;animation:scene-in 1.1s cubic-bezier(.22,.8,.24,1) both, scene-out .9s cubic-bezier(.6,0,.3,1) 4.3s forwards}
 .intro-tilt{transform-style:preserve-3d;transform:rotate(16deg) rotateX(-8deg)}
 .intro-spin{transform-style:preserve-3d;animation:ring-spin 4.4s cubic-bezier(.45,.05,.3,1) .15s both}
 .intro-ring{position:relative;width:0;height:48px;transform-style:preserve-3d}
