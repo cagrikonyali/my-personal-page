@@ -12,6 +12,7 @@ const BIO = [
 // Words that are already dark when the bio appears ("A product")
 const LEAD_WORDS = 2
 const INTRO_MS = 5600
+const AURA_START_MS = 4500 // colors start as the loading ring fades out
 
 // Auto highlight timing (ms from page load)
 const HIGHLIGHT_START_WITH_INTRO = 6500
@@ -26,8 +27,16 @@ const prefersReducedMotion = () =>
 
 function App() {
   const [showIntro, setShowIntro] = useState(() => !prefersReducedMotion())
+  // keep the loading ring smooth: the moving colors are only mounted once it is fading out
+  const [showAura, setShowAura] = useState(() => prefersReducedMotion())
   const stageRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (showAura) return
+    const t = window.setTimeout(() => setShowAura(true), AURA_START_MS)
+    return () => window.clearTimeout(t)
+  }, [showAura])
 
   // Remove the loading ring once its exit animation has finished
   useEffect(() => {
@@ -79,7 +88,7 @@ function App() {
 
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-white text-[#111111]">
-      <Aura />
+      {showAura && <Aura />}
 
       <div className="absolute inset-0 overflow-x-hidden overflow-y-auto">
         <div
