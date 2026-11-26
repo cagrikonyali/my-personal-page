@@ -59,9 +59,10 @@ const icons: Record<string, { name: string; svg: ReactNode }> = {
   },
 }
 
+// Round liquid-glass icons; they come in one by one, left to right
 export function SocialLinks() {
   return (
-    <nav aria-label="Social links" className="flex flex-wrap justify-center gap-[10px] mt-16">
+    <nav aria-label="Social links" className="mt-16 flex flex-wrap justify-center gap-[10px]">
       {site.social.map((link, i) => {
         const icon = icons[link.label]
         return (
@@ -70,7 +71,7 @@ export function SocialLinks() {
               href={link.url}
               {...externalLinkProps}
               aria-label={icon?.name ?? link.label}
-              className="social-icon flex size-11 items-center justify-center rounded-[14px] border border-[rgba(17,17,17,0.08)] bg-white text-[#111111]"
+              className="glass flex size-[52px] items-center justify-center text-[#111111]"
             >
               {icon?.svg ?? link.label}
             </a>
