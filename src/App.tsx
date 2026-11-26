@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Aura } from './components/Aura'
 import { Intro } from './components/Intro'
 import { SocialLinks } from './components/SocialLinks'
 import { site } from './data/site'
@@ -49,7 +50,7 @@ function App() {
     const paint = (prog: number) => {
       for (let i = 0; i < n; i++) {
         const k = i < lead ? 1 : Math.max(0, Math.min(1, (prog - (i - lead)) / WORD_SOFTNESS))
-        const c = Math.round(230 - k * (230 - 68)) // #E6E6E6 → #444444
+        const c = Math.round(217 - k * (217 - 68)) // #D9D9D9 → #444444
         words[i].style.color = `rgb(${c},${c},${c})`
       }
     }
@@ -63,8 +64,7 @@ function App() {
     paint(0)
     const tick = (now: number) => {
       const elapsed = now - t0 - startAt
-      const prog = Math.max(0, elapsed) / MS_PER_WORD
-      paint(prog)
+      paint(Math.max(0, elapsed) / MS_PER_WORD)
       if (elapsed >= duration + OUTRO_AFTER_MS) {
         stageRef.current?.classList.add('on')
         return
@@ -78,46 +78,53 @@ function App() {
   }, [])
 
   return (
-    <div className="relative h-dvh w-full overflow-x-hidden overflow-y-auto bg-white text-[#111111]">
-      <div
-        ref={stageRef}
-        className="relative flex min-h-full flex-col items-center justify-center px-6 pt-[72px] pb-[140px] text-center"
-      >
-        {/* photo */}
-        <div className="relative mb-11 size-24">
-          <div className="avatar-ghost absolute inset-0 rounded-[28px] bg-[#EDEDEA] shadow-[0_16px_36px_-18px_rgba(0,0,0,0.2)]" aria-hidden="true" />
-          <div className="avatar-in absolute inset-0 overflow-hidden rounded-[28px] bg-[#111111] shadow-[0_26px_46px_-18px_rgba(0,0,0,0.42),0_2px_6px_rgba(0,0,0,0.08)]">
-            <img src={site.profileImage} alt="Portrait of Çağrı Konyalı" className="block size-full object-cover" />
-          </div>
-        </div>
+    <div className="relative h-dvh w-full overflow-hidden bg-white text-[#111111]">
+      <Aura />
 
-        <h1 className="rise d1 mb-10 text-[40px] leading-[1.15] font-bold tracking-[-0.04em] text-[#111111]">
-          <span className="font-semibold text-[#DDDDDD]">Hey,</span> I’m Çağrı.
-        </h1>
-
-        {/* bio, highlighted word by word automatically */}
+      <div className="absolute inset-0 overflow-x-hidden overflow-y-auto">
         <div
-          ref={textRef}
-          className="flex w-full max-w-[460px] flex-col gap-[22px] text-[22px] leading-[1.45] font-medium tracking-[-0.025em]"
+          ref={stageRef}
+          className="relative flex min-h-full flex-col items-center justify-center px-6 pt-[72px] pb-[140px] text-center"
         >
-          {BIO.map((para, pi) => (
-            <p key={pi} className={`rise ${pi === 0 ? 'd2' : 'd3'} m-0`}>
-              {para.split(' ').map((w, wi) => (
-                <span key={wi}>
-                  <span className="word">{w}</span>{' '}
-                </span>
-              ))}
-            </p>
-          ))}
+          {/* photo */}
+          <div className="relative mb-11 size-24">
+            <div
+              className="avatar-ghost absolute inset-0 rounded-[28px] bg-[linear-gradient(180deg,#EBEBEB_0%,rgba(235,235,235,0.1)_100%)] backdrop-blur-[10px]"
+              aria-hidden="true"
+            />
+            <div className="avatar-in absolute inset-0 overflow-hidden rounded-[28px] bg-[#111111] shadow-[0_18px_36px_-16px_rgba(0,0,0,0.32),0_2px_6px_rgba(0,0,0,0.06)]">
+              <img src={site.profileImage} alt="Portrait of Çağrı Konyalı" className="block size-full object-cover" />
+            </div>
+          </div>
+
+          <h1 className="rise d1 mb-10 text-[40px] leading-[1.15] font-bold tracking-[-0.04em] text-[#111111]">
+            <span className="font-semibold text-[#C8C8C8]">Hey,</span> I’m Çağrı.
+          </h1>
+
+          {/* bio, highlighted word by word automatically */}
+          <div
+            ref={textRef}
+            className="flex w-full max-w-[460px] flex-col gap-5 text-[20px] leading-[1.5] font-normal tracking-[-0.025em]"
+          >
+            {BIO.map((para, pi) => (
+              <p key={pi} className={`rise ${pi === 0 ? 'd2' : 'd3'} m-0`}>
+                {para.split(' ').map((w, wi) => (
+                  <span key={wi}>
+                    <span className="word">{w}</span>{' '}
+                  </span>
+                ))}
+              </p>
+            ))}
+          </div>
+
+          <SocialLinks />
+
+          {/* footer */}
+          <footer className="outro o2 absolute inset-x-0 bottom-10 flex flex-col items-center gap-1 text-[12px] leading-5 font-normal">
+            <p className="m-0 text-[#4A4A4A]">© Çağrı Konyalı</p>
+            <p className="m-0 text-[#6E6B6B]">Clarity over noise.</p>
+          </footer>
         </div>
-
-        <SocialLinks />
-
-        {/* footer */}
-        <footer className="outro o2 absolute inset-x-0 bottom-10 flex flex-col items-center gap-1 text-[12px] leading-5 font-normal">
-          <p className="m-0 text-[#5C5C5C]">© Çağrı Konyalı</p>
-          <p className="m-0 text-[#D1CECE]">Clarity over noise.</p>
-        </footer>
       </div>
 
       {showIntro && <Intro />}
